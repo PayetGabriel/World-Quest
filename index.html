@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Island Explorer</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="game-wrapper">
+
+    <div id="titre-screen">
+      <canvas id="titre-particules"></canvas>
+      <div id="titre-contenu">
+        <div id="titre-sous-titre">Un voyage aux quatre coins du monde</div>
+        <div id="titre-nom">WORLD QUEST</div>
+        <div id="titre-lore">
+          Une île mystérieuse renferme les secrets de neuf civilisations.<br>
+          Des gardiens anciens veillent sur chaque monument.<br>
+          Pars à leur découverte. Prouve ta valeur.
+        </div>
+        <button id="titre-bouton-jouer" onclick="demarrerJeu()">Jouer</button>
+      </div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
+
+    <div id="message-box"></div>
+
+    <div id="combat-screen">
+      <canvas id="combat-canvas"></canvas>
+
+      <div id="combat-ui">
+
+        <div id="combat-fighters">
+
+          <div class="fighter-block">
+            <div class="fighter-label" id="player-name">Joueur</div>
+            <div id="player-combat-sprite"></div>
+            <div class="hp-bar-small-bg">
+              <div class="hp-bar-small-fill" id="player-combat-hp-fill"></div>
+            </div>
+            <div class="hp-number" id="player-combat-hp-text">100/100</div>
+          </div>
+
+          <div id="vs-label">VS</div>
+
+          <div class="fighter-block">
+            <div class="fighter-label" id="enemy-name">Gardien</div>
+            <div id="enemy-combat-sprite"></div>
+            <div class="hp-bar-small-bg">
+              <div class="hp-bar-small-fill enemy-fill" id="enemy-combat-hp-fill"></div>
+            </div>
+            <div class="hp-number" id="enemy-combat-hp-text">80/80</div>
+          </div>
+
+        </div>
+
+        <div id="combat-log">Un gardien apparaît !</div>
+
+        <div id="combat-controls-hint">
+          A = Attaquer &nbsp;|&nbsp; E = Esquiver &nbsp;|&nbsp; I = Inventaire
+        </div>
+
+      </div>
+    </div>
+
+    <div id="inventory-screen">
+      <div id="inventory-title">Inventaire</div>
+      <div id="inventory-items">
+        <div class="item-slot" id="slot-potion-heal">
+          <div class="item-name">Potion de soin</div>
+          <div class="item-desc">Restaure 30 PV</div>
+          <div class="item-count" id="count-potion-heal">x0</div>
+          <button class="item-use-btn" onclick="useItem('potion-heal')">Utiliser (F)</button>
+        </div>
+        <div class="item-slot" id="slot-potion-boost">
+          <div class="item-name">Potion de boost</div>
+          <div class="item-desc">+10 ATT pendant 5 tours</div>
+          <div class="item-count" id="count-potion-boost">x0</div>
+          <button class="item-use-btn" onclick="useItem('potion-boost')">Utiliser (G)</button>
+        </div>
+      </div>
+      <div id="inventory-hint">Appuie sur I pour fermer</div>
+    </div>
+
+  </div>
+
+  <script src="js/hud.js"></script>
+  <script src="js/titre.js"></script>
+  <script src="js/monuments.js"></script>
+  <script src="js/zones.js"></script>
+  <script src="js/collision.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/sprites.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/combat.js"></script>
+  <script src="js/dev.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
