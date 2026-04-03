@@ -27,6 +27,16 @@ function initialiserHUD() {
   creerPanneauSucces();
   creerPanneauCompetences();
   creerPanneauShop();
+
+  // Touches clavier pour ouvrir les panneaux
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "i" || event.key === "I") {
+      basculerPanneau("inventaire");
+    }
+    if (event.key === "c" || event.key === "C") {
+      basculerPanneau("competences");
+    }
+  });
 }
 
 // =====================
@@ -47,7 +57,7 @@ function creerNavbarHaut() {
   navbar.style.borderBottom = "1px solid rgba(255,255,255,0.1)";
   navbar.style.borderRadius = "0 0 12px 12px";
   navbar.style.padding = "8px 24px";
-  navbar.style.zIndex = "20";
+  navbar.style.zIndex = "50";
   navbar.style.pointerEvents = "all";
 
   // Barre de PV
@@ -199,7 +209,7 @@ function creerBoutonParametres() {
   btn.style.height = "36px";
   btn.style.borderRadius = "8px";
   btn.style.cursor = "pointer";
-  btn.style.zIndex = "20";
+  btn.style.zIndex = "50";
 
   btn.addEventListener("click", function() {
     basculerPanneau("parametres");
@@ -226,7 +236,7 @@ function creerMinimap() {
   wrapper.style.border = "1px solid rgba(255,255,255,0.25)";
   wrapper.style.borderRadius = "6px";
   wrapper.style.overflow = "hidden";
-  wrapper.style.zIndex = "20";
+  wrapper.style.zIndex = "50";
   wrapper.style.background = "#111";
 
   canvasMinimap = document.createElement("canvas");
@@ -286,7 +296,7 @@ function creerPanneau(id, titre) {
   panneau.style.width = "340px";
   panneau.style.display = "none";
   panneau.style.color = "#fff";
-  panneau.style.zIndex = "30";
+  panneau.style.zIndex = "80";
   panneau.style.fontFamily = "Arial, sans-serif";
 
   const enTete = document.createElement("div");
@@ -329,24 +339,118 @@ function creerPanneauInventaire() {
   contenu.style.flexDirection = "column";
   contenu.style.gap = "10px";
 
-  contenu.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.06);padding:10px 14px;border-radius:8px;">
-      <div>
-        <div style="font-size:14px;">Potion de soin</div>
-        <div style="font-size:11px;color:#aaa;">Restaure 30 PV — touche [F]</div>
-      </div>
-      <div style="color:#f0c040;font-size:13px;" id="inv-count-heal">x0</div>
-    </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.06);padding:10px 14px;border-radius:8px;">
-      <div>
-        <div style="font-size:14px;">Potion de boost</div>
-        <div style="font-size:11px;color:#aaa;">+10 ATT pendant 5 attaques — touche [G]</div>
-      </div>
-      <div style="color:#f0c040;font-size:13px;" id="inv-count-boost">x0</div>
-    </div>
-  `;
+  // Potion de soin
+  const ligneSoin = document.createElement("div");
+  ligneSoin.style.display = "flex";
+  ligneSoin.style.justifyContent = "space-between";
+  ligneSoin.style.alignItems = "center";
+  ligneSoin.style.background = "rgba(255,255,255,0.06)";
+  ligneSoin.style.padding = "10px 14px";
+  ligneSoin.style.borderRadius = "8px";
 
+  const infoSoin = document.createElement("div");
+  infoSoin.innerHTML = '<div style="font-size:14px;">Potion de soin</div><div style="font-size:11px;color:#aaa;">Restaure 30 PV</div>';
+
+  const droiteSoin = document.createElement("div");
+  droiteSoin.style.display = "flex";
+  droiteSoin.style.alignItems = "center";
+  droiteSoin.style.gap = "10px";
+
+  const countSoin = document.createElement("span");
+  countSoin.id = "inv-count-heal";
+  countSoin.style.color = "#f0c040";
+  countSoin.style.fontSize = "13px";
+  countSoin.textContent = "x0";
+
+  const btnSoin = document.createElement("button");
+  btnSoin.textContent = "Utiliser";
+  btnSoin.style.background = "rgba(255,255,255,0.08)";
+  btnSoin.style.border = "0.5px solid rgba(255,255,255,0.2)";
+  btnSoin.style.color = "#fff";
+  btnSoin.style.fontSize = "11px";
+  btnSoin.style.padding = "4px 10px";
+  btnSoin.style.borderRadius = "6px";
+  btnSoin.style.cursor = "pointer";
+  btnSoin.addEventListener("click", function() { useItemHorsCombat("potion-heal"); });
+
+  droiteSoin.appendChild(countSoin);
+  droiteSoin.appendChild(btnSoin);
+  ligneSoin.appendChild(infoSoin);
+  ligneSoin.appendChild(droiteSoin);
+
+  // Potion de boost
+  const ligneBoost = document.createElement("div");
+  ligneBoost.style.display = "flex";
+  ligneBoost.style.justifyContent = "space-between";
+  ligneBoost.style.alignItems = "center";
+  ligneBoost.style.background = "rgba(255,255,255,0.06)";
+  ligneBoost.style.padding = "10px 14px";
+  ligneBoost.style.borderRadius = "8px";
+
+  const infoBoost = document.createElement("div");
+  infoBoost.innerHTML = '<div style="font-size:14px;">Potion de boost</div><div style="font-size:11px;color:#aaa;">+10 ATT pendant 5 attaques</div>';
+
+  const droiteBoost = document.createElement("div");
+  droiteBoost.style.display = "flex";
+  droiteBoost.style.alignItems = "center";
+  droiteBoost.style.gap = "10px";
+
+  const countBoost = document.createElement("span");
+  countBoost.id = "inv-count-boost";
+  countBoost.style.color = "#f0c040";
+  countBoost.style.fontSize = "13px";
+  countBoost.textContent = "x0";
+
+  const btnBoost = document.createElement("button");
+  btnBoost.textContent = "Utiliser";
+  btnBoost.style.background = "rgba(255,255,255,0.08)";
+  btnBoost.style.border = "0.5px solid rgba(255,255,255,0.2)";
+  btnBoost.style.color = "#fff";
+  btnBoost.style.fontSize = "11px";
+  btnBoost.style.padding = "4px 10px";
+  btnBoost.style.borderRadius = "6px";
+  btnBoost.style.cursor = "pointer";
+  btnBoost.addEventListener("click", function() { useItemHorsCombat("potion-boost"); });
+
+  droiteBoost.appendChild(countBoost);
+  droiteBoost.appendChild(btnBoost);
+  ligneBoost.appendChild(infoBoost);
+  ligneBoost.appendChild(droiteBoost);
+
+  contenu.appendChild(ligneSoin);
+  contenu.appendChild(ligneBoost);
   panneau.appendChild(contenu);
+}
+
+// Utilisation d une potion hors combat (depuis le panneau inventaire)
+function useItemHorsCombat(type) {
+  if (type === "potion-heal") {
+    if (inventaire["potion-heal"] <= 0) {
+      afficherMessage("Plus de potions de soin !");
+      return;
+    }
+    inventaire["potion-heal"] = inventaire["potion-heal"] - 1;
+    joueur.hp = joueur.hp + 30;
+    if (joueur.hp > joueur.hpMax) {
+      joueur.hp = joueur.hpMax;
+    }
+    mettreAJourHUDJoueur();
+    mettreAJourHUDNavbar();
+    afficherMessage("Potion de soin utilisée : +30 PV !");
+  }
+
+  if (type === "potion-boost") {
+    if (inventaire["potion-boost"] <= 0) {
+      afficherMessage("Plus de potions de boost !");
+      return;
+    }
+    inventaire["potion-boost"] = inventaire["potion-boost"] - 1;
+    joueur.attackBoost = 10;
+    joueur.attackBoostTours = 5;
+    afficherMessage("Potion de boost activée : +10 ATT pour 5 attaques !");
+  }
+
+  mettreAJourPanneau("inventaire");
 }
 
 function creerPanneauSucces() {
@@ -357,13 +461,11 @@ function creerPanneauSucces() {
   contenu.style.flexDirection = "column";
   contenu.style.gap = "8px";
 
-  const monuments = [
-    "Tour Eiffel", "Pyramides de Gizeh", "Colisée", "Burj Khalifa",
-    "Taj Mahal", "Statue de la Liberté", "Acropole d'Athènes",
-    "Kinkaku-ji", "Christ Rédempteur"
-  ];
+  // On utilise directement MONUMENTS dans l ordre du tableau
+  // comme ça le nom et l id sont toujours cohérents
+  for (let i = 0; i < MONUMENTS.length; i++) {
+    const monument = MONUMENTS[i];
 
-  for (let i = 0; i < monuments.length; i++) {
     const ligne = document.createElement("div");
     ligne.style.display = "flex";
     ligne.style.alignItems = "center";
@@ -371,16 +473,15 @@ function creerPanneauSucces() {
     ligne.style.padding = "6px 10px";
     ligne.style.background = "rgba(255,255,255,0.04)";
     ligne.style.borderRadius = "6px";
-    ligne.dataset.monument = MONUMENTS[i].id;
 
     const etoile = document.createElement("span");
     etoile.style.fontSize = "16px";
     etoile.textContent = "☆";
-    etoile.id = "succes-etoile-" + MONUMENTS[i].id;
+    etoile.id = "succes-etoile-" + monument.id;
 
     const nom = document.createElement("span");
     nom.style.fontSize = "13px";
-    nom.textContent = monuments[i];
+    nom.textContent = monument.nom + " — " + monument.pays;
 
     ligne.appendChild(etoile);
     ligne.appendChild(nom);

@@ -23,6 +23,15 @@ window.addEventListener("resize", function() {
     canvasDev.height = CANVAS_HAUTEUR;
   }
 
+  // On redimensionne aussi le canvas du brouillard
+  // Attention : changer .width ou .height réinitialise le contexte 2D
+  // donc on doit récupérer un nouveau contexte après
+  if (canvasBrouillard !== null) {
+    canvasBrouillard.width = CANVAS_LARGEUR;
+    canvasBrouillard.height = CANVAS_HAUTEUR;
+    ctxBrouillard = canvasBrouillard.getContext("2d");
+  }
+
   // On recalcule les dimensions de la camera selon le nouveau zoom
   camera.largeur = CANVAS_LARGEUR / ZOOM;
   camera.hauteur = CANVAS_HAUTEUR / ZOOM;
@@ -45,12 +54,12 @@ function demarrerJeu() {
       chargerZones(function() {
         chargerMap(function() {
           chargerSpritesheet(function() {
-          console.log("Tout est chargé, démarrage du jeu !");
-          initialiserDev();
-          initialiserHUD();
-          mettreAJourHUDJoueur();
-          afficherMessage("Explore l'île et découvre les 9 monuments !");
-          requestAnimationFrame(boucleDeJeu);
+            console.log("Tout est chargé, démarrage du jeu !");
+            initialiserDev();
+            initialiserHUD();
+            mettreAJourHUDJoueur();
+            afficherMessage("Explore l'île et découvre les 9 monuments !");
+            requestAnimationFrame(boucleDeJeu);
           });
         });
       });

@@ -14,7 +14,6 @@ function initialiserDev() {
   canvasDev.style.left = "0";
   canvasDev.style.pointerEvents = "none";
   canvasDev.style.display = "none";
-  canvasDev.style.zIndex = "25";
   document.getElementById("game-wrapper").appendChild(canvasDev);
 
   ctxDev = canvasDev.getContext("2d");
@@ -126,26 +125,26 @@ function mettreAJourDev() {
   }
   
 
-  // Afficher coordonnees et hitbox quand le mode dev est ouvert
-  if (devModeActif) {
+  // Toujours afficher les coordonnees et la hitbox quand le mode dev est ouvert
+  if (devModeActif === true) {
+    if (!devModeActif) return;
 
-    // Coordonnees en bas a gauche
+    const posEcran = mapVersEcran(joueur.x, joueur.y);
+
+    if (posEcran === null || posEcran === undefined) {
+      return;
+    }
+
     ctxDev.fillStyle = "rgba(0, 0, 0, 0.6)";
     ctxDev.fillRect(10, CANVAS_HAUTEUR - 40, 260, 28);
+
     ctxDev.fillStyle = "#f0c040";
     ctxDev.font = "13px Arial";
-    ctxDev.fillText("x: " + Math.round(joueur.x) + "   y: " + Math.round(joueur.y), 18, CANVAS_HAUTEUR - 21);
 
-    // Hitbox du joueur : cercle rouge a sa position sur l ecran
-    // joueur.taille est le rayon en pixels sur la map
-    // On le convertit en pixels ecran avec le ratio camera/canvas
-    const posEcran = mapVersEcran(joueur.x, joueur.y);
-    const rayonEcran = joueur.taille * (CANVAS_LARGEUR / camera.largeur);
-
-    ctxDev.strokeStyle = "rgba(255, 0, 0, 0.9)";
-    ctxDev.lineWidth = 2;
-    ctxDev.beginPath();
-    ctxDev.arc(posEcran.x, posEcran.y, rayonEcran, 0, Math.PI * 2);
-    ctxDev.stroke();
+    ctxDev.fillText(
+      "x: " + Math.round(joueur.x) + "   y: " + Math.round(joueur.y),
+      18,
+      CANVAS_HAUTEUR - 21
+    );
   }
 }
