@@ -13,7 +13,6 @@ body {
   height: 100vh;
   overflow: hidden;
   font-family: Arial, sans-serif;
-  margin: 0;
 }
 
 #game-wrapper {
@@ -28,24 +27,454 @@ body {
   display: block;
 }
 
-/* Ancien HUD supprime - remplace par hud.js */
+/* =====================
+   NAVBAR
+   ===================== */
 
-/* Boite de message en bas */
+/* La navbar est une bande en haut qui sépare EXIT / bloc centre / PARAMS */
+#navbar-haut {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* Le bloc central regroupe la barre de vie ET les boutons icônes */
+#nav-centre {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  pointer-events: all;
+  padding: 0 14px;
+}
+
+/* Zone barre de vie : cœur + barre */
+#nav-pv-zone {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-right: 14px;
+}
+
+#nav-coeur-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Barre de PV — 3 contours emboîtés */
+
+/* Contour extérieur : noir fin */
+#nav-pv-outer {
+  padding: 1px;
+  border-radius: 12px;
+  background: #000;
+}
+
+/* Contour milieu : dégradé haut #768774 → bas #444F55 */
+#nav-pv-mid {
+  padding: 2px;
+  border-radius: 9px;
+  background: linear-gradient(to bottom, #768774, #444F55);
+}
+
+/* Contour intérieur : noir fin */
+#nav-pv-inner {
+  padding: 1px;
+  border-radius: 7px;
+  background: #000;
+}
+
+/* La barre — fond = partie vide */
+#nav-pv-wrap {
+  position: relative;
+  width: 140px;
+  height: 18px;
+  background: #398470;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Le remplissage vert */
+#nav-pv-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(to right, #679765, #6EA35F);
+  border-radius: 6px;
+  transition: width 0.25s;
+}
+
+/* Lumière en haut */
+#nav-pv-fill::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 6px 6px 0 0;
+}
+
+/* Ombre en bas */
+#nav-pv-fill::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 25%;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0 0 6px 6px;
+}
+
+#nav-pv-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 3px #000;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Séparateur vertical entre PV et boutons */
+#nav-sep {
+  width: 1px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 12px;
+  flex-shrink: 0;
+}
+
+/* Chaque bouton icône (wrap = bouton + label en dessous) */
+.nav-btn-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  pointer-events: all;
+  margin: 0 6px;
+}
+
+/* Le bouton lui-même, avec Boutton.png en fond */
+.nav-btn {
+  width: 68px;
+  height: 68px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: transform 0.1s, filter 0.1s;
+}
+
+.nav-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.15);
+}
+
+.nav-btn:active {
+  transform: scale(0.93);
+  filter: brightness(0.9);
+}
+
+/* L'icône à l'intérieur du bouton */
+.nav-icone {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* Label texte sous le bouton — contour noir épais pour lisibilité sans fond */
+.nav-label {
+  font-size: 10px;
+  color: #fff;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 2px 4px #000;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+/* EXIT et PARAMÈTRES */
+#nav-exit,
+#nav-params {
+  pointer-events: all;
+}
+
+/* =====================
+   MINIMAP
+   ===================== */
+
+#minimap-wrapper {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 160px;
+  height: 90px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 50;
+  background: #111;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* =====================
+   PANNEAUX OVERLAY — ardoise / flat gaming
+   ===================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700&display=swap');
+
+.panneau {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  display: none;
+  color: #e8f0f0;
+  z-index: 80;
+  font-family: 'Exo 2', Arial, sans-serif;
+  overflow: hidden;
+  background: #5d7a7a;
+  border-radius: 15px;
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.panneau-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 20px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.panneau-entete-gauche {
+  display: flex;
+  flex-direction: column;
+}
+
+.panneau-titre {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.panneau-sous-titre {
+  font-size: 11px;
+  color: #a8c4c4;
+  margin-top: 3px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.panneau-fermer {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #a8c4c4;
+  font-size: 14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.panneau-fermer:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.panneau-corps {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.panneau-corps::-webkit-scrollbar { width: 5px; }
+.panneau-corps::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.15); border-radius: 3px; }
+.panneau-corps::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+
+.item-ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #4a6363;
+  border-radius: 10px;
+  padding: 11px 14px;
+  transition: background 0.15s;
+}
+
+.item-ligne:hover { background: #527070; }
+
+.item-icone { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; }
+.item-info { flex: 1; min-width: 0; }
+
+.item-nom {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+}
+
+.item-desc {
+  font-size: 11px;
+  color: #a0b8b8;
+  margin-top: 2px;
+}
+
+.item-droite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.item-count {
+  font-size: 12px;
+  color: #c8e0e0;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.item-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #e8f0f0;
+  font-size: 12px;
+  font-family: 'Exo 2', Arial, sans-serif;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.item-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #f0d060;
+  border-color: rgba(240, 208, 96, 0.5);
+}
+
+.item-btn-or {
+  background: rgba(240, 200, 64, 0.15);
+  border-color: rgba(240, 200, 64, 0.4);
+  color: #f0d060;
+}
+
+.item-btn-or:hover { background: rgba(240, 200, 64, 0.28); }
+
+.succes-ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  background: #4a6363;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.succes-ligne:hover { background: #527070; }
+.succes-etoile { font-size: 18px; color: #6a8888; width: 20px; text-align: center; flex-shrink: 0; }
+.succes-nom { flex: 1; font-size: 13px; color: #e8f0f0; font-weight: 600; }
+.succes-pays { font-size: 11px; color: #90aaaa; }
+
+.comp-points { font-size: 12px; color: #a8c4c4; letter-spacing: 0.3px; padding: 2px 0 4px; }
+.shop-or { font-size: 13px; color: #f0d060; font-weight: 700; padding: 2px 0 4px; }
+
+.param-ligne {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #e8f0f0;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.param-ligne:last-of-type { border-bottom: none; }
+
+.param-select {
+  background: #4a6363;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e8f0f0;
+  font-size: 12px;
+  font-family: 'Exo 2', Arial, sans-serif;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.param-version { font-size: 11px; color: #7a9898; margin-top: 6px; text-align: center; letter-spacing: 0.5px; }
+
+#panneau-map { width: 88vw; max-width: 1100px; }
+
+.map-panel-wrap {
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+}
+
+.map-panel-wrap canvas { display: block; width: 100%; height: auto; }
+.map-legende { font-size: 11px; color: #a8c4c4; text-align: center; margin-top: 6px; letter-spacing: 0.3px; }
+
+/* =====================
+   MESSAGE BOX
+   ===================== */
+
 #message-box {
   position: absolute;
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.78);
   color: white;
   font-size: 13px;
   padding: 8px 18px;
   border-radius: 8px;
   text-align: center;
   display: none;
+  z-index: 60;
 }
 
-/* Ecran de combat par dessus le canvas */
+/* =====================
+   COMBAT
+   ===================== */
+
 #combat-screen {
   position: absolute;
   top: 0;
@@ -71,7 +500,7 @@ body {
   position: relative;
   width: 100%;
   padding: 12px 20px;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.78);
 }
 
 #combat-fighters {
@@ -88,55 +517,16 @@ body {
   gap: 4px;
 }
 
-.fighter-label {
-  color: #ccc;
-  font-size: 12px;
-}
+.fighter-label { color: #ccc; font-size: 12px; }
 
-#player-combat-sprite {
-  width: 60px;
-  height: 80px;
-  background: #2980b9;
-  border-radius: 4px;
-}
+#player-combat-sprite { width: 60px; height: 80px; background: #2980b9; border-radius: 4px; }
+#enemy-combat-sprite  { width: 60px; height: 80px; background: #c0392b; border-radius: 4px; }
 
-#enemy-combat-sprite {
-  width: 60px;
-  height: 80px;
-  background: #c0392b;
-  border-radius: 4px;
-}
-
-.hp-bar-small-bg {
-  width: 80px;
-  height: 8px;
-  background: #444;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.hp-bar-small-fill {
-  height: 100%;
-  width: 100%;
-  background: #e74c3c;
-  border-radius: 4px;
-  transition: width 0.2s;
-}
-
-.enemy-fill {
-  background: #3498db;
-}
-
-.hp-number {
-  color: #aaa;
-  font-size: 11px;
-}
-
-#vs-label {
-  color: #555;
-  font-size: 20px;
-  align-self: center;
-}
+.hp-bar-small-bg { width: 80px; height: 8px; background: #444; border-radius: 4px; overflow: hidden; }
+.hp-bar-small-fill { height: 100%; width: 100%; background: #e74c3c; border-radius: 4px; transition: width 0.2s; }
+.enemy-fill { background: #3498db; }
+.hp-number { color: #aaa; font-size: 11px; }
+#vs-label { color: #555; font-size: 20px; align-self: center; }
 
 #combat-log {
   background: rgba(255, 255, 255, 0.07);
@@ -155,7 +545,10 @@ body {
   text-align: center;
 }
 
-/* Ecran inventaire */
+/* =====================
+   INVENTAIRE COMBAT
+   ===================== */
+
 #inventory-screen {
   position: absolute;
   top: 50%;
@@ -168,7 +561,7 @@ body {
   width: 320px;
   display: none;
   color: white;
-  z-index: 25;
+  z-index: 30;
 }
 
 #inventory-title {
@@ -179,11 +572,7 @@ body {
   color: #f0c040;
 }
 
-#inventory-items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+#inventory-items { display: flex; flex-direction: column; gap: 10px; }
 
 .item-slot {
   background: rgba(255, 255, 255, 0.06);
@@ -193,21 +582,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
-}
-
-.item-name {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.item-desc {
-  font-size: 12px;
-  color: #aaa;
-}
-
-.item-count {
-  font-size: 12px;
-  color: #f0c040;
 }
 
 .item-use-btn {
@@ -222,9 +596,7 @@ body {
   align-self: flex-start;
 }
 
-.item-use-btn:hover {
-  background: rgba(255, 255, 255, 0.16);
-}
+.item-use-btn:hover { background: rgba(255, 255, 255, 0.16); }
 
 #inventory-hint {
   margin-top: 14px;
@@ -233,7 +605,10 @@ body {
   color: rgba(255, 255, 255, 0.35);
 }
 
-/* ===== ÉCRAN TITRE ===== */
+/* =====================
+   ÉCRAN TITRE
+   ===================== */
+
 #titre-screen {
   position: absolute;
   top: 0;
@@ -257,11 +632,7 @@ body {
   pointer-events: none;
 }
 
-#titre-contenu {
-  position: relative;
-  text-align: center;
-  z-index: 2;
-}
+#titre-contenu { position: relative; text-align: center; z-index: 2; }
 
 #titre-sous-titre {
   font-size: 13px;
@@ -308,14 +679,4 @@ body {
   background: rgba(100, 180, 120, 0.15);
   border-color: #a0d8b0;
   color: #d0f8e0;
-}
-
-#titre-decorations {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
 }
