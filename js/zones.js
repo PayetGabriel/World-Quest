@@ -11,13 +11,11 @@ let ctxBrouillard = null;
 let textureBrouillard = null;
 let textureBrouillardChargee = false;
 
-// Chaque zone a une couleur dans Zones.jpg et un état débloqué ou non
-// L'ordre dans ce tableau est l'ordre de déblocage
 const ZONES = [
   {
     nom: "Couloir départ",
     couleurR: 255, couleurV: 255, couleurB: 255,
-    debloquee: true  // toujours libre, jamais de brouillard
+    debloquee: true
   },
   {
     nom: "Tour Eiffel",
@@ -66,7 +64,6 @@ const ZONES = [
   }
 ];
 
-// Charge Zones.jpg et crée le canvas du brouillard
 function chargerZones(callback) {
   const image = new Image();
   image.src = "assets/Zones.jpg";
@@ -85,7 +82,6 @@ function chargerZones(callback) {
 
     console.log("Zones chargées :", image.width, "x", image.height);
 
-    // On charge la texture du brouillard
     textureBrouillard = new Image();
     textureBrouillard.src = "assets/brouillard.jpg";
     textureBrouillard.onload = function() {
@@ -112,8 +108,6 @@ function creerCanvasBrouillard() {
   canvasBrouillard.style.pointerEvents = "none";
   canvasBrouillard.style.zIndex = "5";
 
-  // On insère le canvas brouillard en PREMIER dans game-wrapper
-  // pour qu'il soit sous tous les autres éléments (HUD, panneaux, etc.)
   const wrapper = document.getElementById("game-wrapper");
   const premierEnfant = wrapper.firstChild;
   if (premierEnfant) {
@@ -125,15 +119,11 @@ function creerCanvasBrouillard() {
   ctxBrouillard = canvasBrouillard.getContext("2d");
 }
 
-// Retourne la zone correspondant à un pixel de la map
-// On convertit les coordonnées map en coordonnées dans l'image Zones.jpg
 function getZoneDuPixel(mapX, mapY) {
   if (zonesImageData === null) {
     return null;
   }
 
-  // L'image Zones.jpg a peut-être une taille différente de la map
-  // On recalcule les coordonnées proportionnellement
   const px = Math.floor((mapX / MAP_LARGEUR) * zonesImageWidth);
   const py = Math.floor((mapY / MAP_HAUTEUR) * zonesImageHeight);
 
@@ -146,8 +136,6 @@ function getZoneDuPixel(mapX, mapY) {
   const v = zonesImageData[index + 1];
   const b = zonesImageData[index + 2];
 
-  // On cherche quelle zone correspond à cette couleur
-  // On tolère une petite marge car le JPG compresse et déforme légèrement les couleurs
   for (let i = 0; i < ZONES.length; i++) {
     const zone = ZONES[i];
     const diffR = Math.abs(r - zone.couleurR);
@@ -163,18 +151,15 @@ function getZoneDuPixel(mapX, mapY) {
 }
 
 // Cache simple pour éviter de relire le même pixel plusieurs fois par frame
-// On stocke le dernier résultat et les coordonnées testées
 let cacheDerniereMapX = -1;
 let cacheDerniereMapY = -1;
 let cacheDernierResultat = false;
 
-// Vérifie si un point sur la map est dans une zone bloquée par le brouillard
 function estBloqueParZone(mapX, mapY) {
   if (zonesImageData === null) {
     return false;
   }
 
-  // Si on teste le même pixel qu'avant on retourne directement le résultat en cache
   const px = Math.round(mapX);
   const py = Math.round(mapY);
   if (px === cacheDerniereMapX && py === cacheDerniereMapY) {
@@ -191,9 +176,6 @@ function estBloqueParZone(mapX, mapY) {
   return resultat;
 }
 
-// Vérifie si le joueur franchit la ligne de déclenchement du couloir vers la Tour Eiffel
-// Cette ligne est à y=1399, x entre 2088 et 2158
-// On utilise un booléen pour ne déclencher qu'une seule fois
 let debloquageDepartFait = false;
 
 function verifierDebloquageDepart() {
@@ -208,7 +190,6 @@ function verifierDebloquageDepart() {
   }
 }
 
-// Débloque une zone par son index dans le tableau ZONES
 function debloquerZone(index) {
   if (index < ZONES.length) {
     ZONES[index].debloquee = true;
@@ -216,19 +197,16 @@ function debloquerZone(index) {
   }
 }
 
-// Appelée depuis combat.js quand un monument est battu
-// Elle débloque la zone suivante dans l'ordre
 function debloquerZoneSuivante(nomMonument) {
-  // On fait correspondre les noms des monuments aux index des zones
   const correspondances = {
-    "Tour Eiffel":           2,  // débloque Temple Grec
-    "Acropole d'Athènes":    3,  // débloque Sanctuaire Doré
-    "Kinkaku-ji":            4,  // débloque Taj Mahal
-    "Taj Mahal":             5,  // débloque Christ Rédempteur
-    "Christ Rédempteur":     6,  // débloque Burj Khalifa
-    "Burj Khalifa":          7,  // débloque Statue de la Liberté
-    "Statue de la Liberté":  8,  // débloque Pyramides
-    "Pyramides de Gizeh":    9,  // débloque Colisée
+    "Tour Eiffel":           2,
+    "Acropole d'Athènes":    3,
+    "Kinkaku-ji":            4,
+    "Taj Mahal":             5,
+    "Christ Rédempteur":     6,
+    "Burj Khalifa":          7,
+    "Statue de la Liberté":  8,
+    "Pyramides de Gizeh":    9,
   };
 
   const indexADebloquer = correspondances[nomMonument];
@@ -238,14 +216,82 @@ function debloquerZoneSuivante(nomMonument) {
   }
 }
 
-// Dessine le brouillard sur toutes les zones non débloquées
-// La texture est ancrée sur la MAP (pas sur l écran)
+// Vérifie si un pixel de masque doit être blanc (brouillard)
+// On teste le pixel et ses 8 voisins dans l'image Zones.jpg
+// Si au moins un voisin est dans une zone bloquée et aucun voisin n'est clairement libre,
+// on remplit quand même pour éviter les trous de frontière
+function pixelDoitEtreBrouillard(mapX, mapY) {
+  const zone = getZoneDuPixel(mapX, mapY);
+
+  // Pixel clairement dans une zone débloquée -> pas de brouillard
+  if (zone !== null && zone.debloquee) {
+    return false;
+  }
+
+  // Pixel clairement dans une zone bloquée -> brouillard
+  if (zone !== null && !zone.debloquee) {
+    return true;
+  }
+
+  // Pixel non classifiable (frontière JPG) -> on regarde les voisins
+  // On convertit les coordonnées map en coordonnées image
+  const pxCentre = Math.floor((mapX / MAP_LARGEUR) * zonesImageWidth);
+  const pyCentre = Math.floor((mapY / MAP_HAUTEUR) * zonesImageHeight);
+
+  // Taille d'un pixel écran en coordonnées image
+  const pasImageX = zonesImageWidth / MAP_LARGEUR;
+  const pasImageY = zonesImageHeight / MAP_HAUTEUR;
+
+  let aVoisinBloque = false;
+  let aVoisinLibre = false;
+
+  // On teste les 8 pixels voisins dans l'image
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      if (dx === 0 && dy === 0) { continue; }
+
+      const vx = pxCentre + dx;
+      const vy = pyCentre + dy;
+
+      if (vx < 0 || vy < 0 || vx >= zonesImageWidth || vy >= zonesImageHeight) { continue; }
+
+      const index = (vy * zonesImageWidth + vx) * 4;
+      const r = zonesImageData[index];
+      const v = zonesImageData[index + 1];
+      const b = zonesImageData[index + 2];
+
+      for (let i = 0; i < ZONES.length; i++) {
+        const z = ZONES[i];
+        const diffR = Math.abs(r - z.couleurR);
+        const diffV = Math.abs(v - z.couleurV);
+        const diffB = Math.abs(b - z.couleurB);
+
+        if (diffR < 15 && diffV < 15 && diffB < 15) {
+          if (z.debloquee) {
+            aVoisinLibre = true;
+          } else {
+            aVoisinBloque = true;
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  // Si voisin bloqué sans voisin libre clairement identifié -> brouillard
+  // Ça couvre les pixels de frontière sans mordre sur les zones libres
+  if (aVoisinBloque && !aVoisinLibre) {
+    return true;
+  }
+
+  return false;
+}
+
 function dessinerBrouillard() {
   if (ctxBrouillard === null || zonesImageData === null) {
     return;
   }
 
-  // Étape 1 : masque basse résolution
   const echelleReduite = 6;
   const largeurReduite = Math.ceil(CANVAS_LARGEUR / echelleReduite);
   const hauteurReduite = Math.ceil(CANVAS_HAUTEUR / echelleReduite);
@@ -262,35 +308,30 @@ function dessinerBrouillard() {
       const mapX = camera.x + (ecranX / CANVAS_LARGEUR) * camera.largeur;
       const mapY = camera.y + (ecranY / CANVAS_HAUTEUR) * camera.hauteur;
 
-      const zone = getZoneDuPixel(mapX, mapY);
-      if (zone !== null && !zone.debloquee) {
+      // On utilise la nouvelle fonction qui gère les pixels de frontière
+      if (pixelDoitEtreBrouillard(mapX, mapY)) {
         ctxMasque.fillStyle = "rgba(255, 255, 255, 1)";
         ctxMasque.fillRect(px, py, 1, 1);
       }
     }
   }
 
-  // Étape 2 : canvas final avec texture ancrée sur la map
   const final = document.createElement("canvas");
   final.width = CANVAS_LARGEUR;
   final.height = CANVAS_HAUTEUR;
   const ctxFinal = final.getContext("2d");
 
   if (textureBrouillardChargee) {
-    // La texture fait 1024x1024 pixels sur la map, elle se répète (tile)
     const tailleTextureSurMap = 1024;
 
-    // Décalage de la caméra dans la texture (modulo pour le tiling)
     const offsetX = camera.x % tailleTextureSurMap;
     const offsetY = camera.y % tailleTextureSurMap;
 
-    // Taille de la texture en pixels écran
     const pixelMapParEcranX = camera.largeur / CANVAS_LARGEUR;
     const pixelMapParEcranY = camera.hauteur / CANVAS_HAUTEUR;
     const tailleTextureEcranX = tailleTextureSurMap / pixelMapParEcranX;
     const tailleTextureEcranY = tailleTextureSurMap / pixelMapParEcranY;
 
-    // Point de départ du tiling (négatif pour commencer hors écran si besoin)
     const debutX = -(offsetX / pixelMapParEcranX);
     const debutY = -(offsetY / pixelMapParEcranY);
 
@@ -309,7 +350,6 @@ function dessinerBrouillard() {
     ctxFinal.fillRect(0, 0, CANVAS_LARGEUR, CANVAS_HAUTEUR);
   }
 
-  // Étape 3 : masque avec bords flous
   ctxFinal.imageSmoothingEnabled = true;
   ctxFinal.imageSmoothingQuality = "high";
   ctxFinal.globalCompositeOperation = "destination-in";
@@ -318,14 +358,12 @@ function dessinerBrouillard() {
   ctxFinal.filter = "none";
   ctxFinal.globalCompositeOperation = "source-over";
 
-  // Deuxième passe pour opacifier le centre
   ctxFinal.globalCompositeOperation = "destination-in";
   ctxFinal.filter = "blur(6px)";
   ctxFinal.drawImage(masque, 0, 0, CANVAS_LARGEUR, CANVAS_HAUTEUR);
   ctxFinal.filter = "none";
   ctxFinal.globalCompositeOperation = "source-over";
 
-  // Étape 4 : on colle sur le canvas principal
   ctxBrouillard.clearRect(0, 0, CANVAS_LARGEUR, CANVAS_HAUTEUR);
   ctxBrouillard.drawImage(final, 0, 0);
 }
