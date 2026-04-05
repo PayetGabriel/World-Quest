@@ -471,27 +471,50 @@ function creerPanneauShop() {
   }
 }
 
-// ---- Map ----
+// ---- Map — plein écran indépendant (pas un .panneau classique) ----
 
 function creerPanneauMap() {
-  creerCoquillePanneau("panneau-map", "Carte du monde");
-  let corps = document.getElementById("panneau-map-corps");
+  let ecran = document.createElement("div");
+  ecran.id = "panneau-map";
+  document.getElementById("game-wrapper").appendChild(ecran);
 
-  let canvasWrap = document.createElement("div");
-  canvasWrap.className = "map-panel-wrap";
-
+  // Canvas plein écran
   let canvasMap = document.createElement("canvas");
   canvasMap.id = "map-panel-canvas";
-  canvasMap.width = 480;
-  canvasMap.height = 260;
+  ecran.appendChild(canvasMap);
 
-  canvasWrap.appendChild(canvasMap);
-  corps.appendChild(canvasWrap);
+  // Bouton ✕ en haut à droite — fond Boutton.png, texte × en dégradé rouge
+  let btn = document.createElement("button");
+  btn.id = "map-btn-fermer";
+  btn.className = "nav-btn";
+  btn.style.backgroundImage = "url('assets/nav/extract/Boutton.png')";
 
-  let legende = document.createElement("div");
-  legende.className = "map-legende";
-  legende.textContent = "● Blanc = toi   ● Rouge = monument   ● Or = découvert";
-  corps.appendChild(legende);
+  let croix = document.createElement("span");
+  croix.id = "map-croix";
+  croix.textContent = "×";
+
+  btn.appendChild(croix);
+  btn.addEventListener("click", function() {
+    ecran.style.display = "none";
+  });
+
+  ecran.appendChild(btn);
+
+  // Touche M pour ouvrir, Échap pour fermer
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "m" || event.key === "M") {
+      if (combatEnCours) { return; }
+      if (ecran.style.display === "none" || ecran.style.display === "") {
+        ecran.style.display = "block";
+        mettreAJourPanneauMap();
+      } else {
+        ecran.style.display = "none";
+      }
+    }
+    if (event.key === "Escape" && !combatEnCours) {
+      ecran.style.display = "none";
+    }
+  });
 }
 
 function mettreAJourPanneauMap() {
@@ -499,24 +522,50 @@ function mettreAJourPanneauMap() {
   if (c === null || typeof mapImage === "undefined" || mapImage === null) {
     return;
   }
-  let ctx2 = c.getContext("2d");
-  ctx2.drawImage(mapImage, 0, 0, 480, 260);
 
+  // On adapte la taille du canvas à l'écran
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
+
+  let ctx2 = c.getContext("2d");
+
+  // On dessine la map en gardant les proportions, centrée
+  let ratioMap = MAP_LARGEUR / MAP_HAUTEUR;
+  let ratioEcran = window.innerWidth / window.innerHeight;
+
+  let drawW, drawH, drawX, drawY;
+
+  if (ratioEcran > ratioMap) {
+    drawH = window.innerHeight;
+    drawW = drawH * ratioMap;
+    drawX = (window.innerWidth - drawW) / 2;
+    drawY = 0;
+  } else {
+    drawW = window.innerWidth;
+    drawH = drawW / ratioMap;
+    drawX = 0;
+    drawY = (window.innerHeight - drawH) / 2;
+  }
+
+  ctx2.drawImage(mapImage, drawX, drawY, drawW, drawH);
+
+  // Points monuments
   for (let i = 0; i < MONUMENTS.length; i++) {
     let m = MONUMENTS[i];
-    let mx = (m.x / MAP_LARGEUR) * 480;
-    let my = (m.y / MAP_HAUTEUR) * 260;
+    let mx = drawX + (m.x / MAP_LARGEUR) * drawW;
+    let my = drawY + (m.y / MAP_HAUTEUR) * drawH;
     ctx2.fillStyle = m.decouvert ? "#f0c040" : "#e74c3c";
     ctx2.beginPath();
-    ctx2.arc(mx, my, 4, 0, Math.PI * 2);
+    ctx2.arc(mx, my, 6, 0, Math.PI * 2);
     ctx2.fill();
   }
 
-  let jx = (joueur.x / MAP_LARGEUR) * 480;
-  let jy = (joueur.y / MAP_HAUTEUR) * 260;
+  // Point joueur
+  let jx = drawX + (joueur.x / MAP_LARGEUR) * drawW;
+  let jy = drawY + (joueur.y / MAP_HAUTEUR) * drawH;
   ctx2.fillStyle = "#fff";
   ctx2.beginPath();
-  ctx2.arc(jx, jy, 5, 0, Math.PI * 2);
+  ctx2.arc(jx, jy, 7, 0, Math.PI * 2);
   ctx2.fill();
 }
 
@@ -578,7 +627,20 @@ function creerPanneauParametres() {
 // =====================
 
 function basculerPanneau(nom) {
-  let tous = ["inventaire", "succes", "competences", "shop", "map", "parametres"];
+  // La map est un plein écran à part, pas un .panneau classique
+  if (nom === "map") {
+    let ecranMap = document.getElementById("panneau-map");
+    if (ecranMap === null) { return; }
+    if (ecranMap.style.display === "none" || ecranMap.style.display === "") {
+      ecranMap.style.display = "block";
+      mettreAJourPanneauMap();
+    } else {
+      ecranMap.style.display = "none";
+    }
+    return;
+  }
+
+  let tous = ["inventaire", "succes", "competences", "shop", "parametres"];
 
   for (let i = 0; i < tous.length; i++) {
     let panneau = document.getElementById("panneau-" + tous[i]);
@@ -589,9 +651,6 @@ function basculerPanneau(nom) {
       if (panneau.style.display === "none" || panneau.style.display === "") {
         panneau.style.display = "block";
         mettreAJourPanneau(nom);
-        if (nom === "map") {
-          mettreAJourPanneauMap();
-        }
       } else {
         panneau.style.display = "none";
       }

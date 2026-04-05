@@ -55,50 +55,52 @@ body {
   padding: 0 14px;
 }
 
-/* Zone barre de vie : cœur + barre */
+/* Zone barre de vie : cœur + barre — remontée légèrement */
 #nav-pv-zone {
   display: flex;
   align-items: center;
   gap: 7px;
   padding-right: 14px;
+  margin-top: -6px;
 }
 
 #nav-coeur-img {
-  width: 32px;
-  height: 32px;
+  width: 42px;
+  height: 42px;
   object-fit: contain;
 }
 
 /* Barre de PV — 3 contours emboîtés */
 
-/* Contour extérieur : noir fin */
+
+/* Contour extérieur : ligne noire externe 1px */
 #nav-pv-outer {
   padding: 1px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #000;
 }
 
-/* Contour milieu : dégradé haut #768774 → bas #444F55 */
+/* Corps de la bordure : dégradé haut #758278 → bas #445159 */
 #nav-pv-mid {
-  padding: 2px;
-  border-radius: 9px;
-  background: linear-gradient(to bottom, #768774, #444F55);
+  padding: 4px;
+  border-radius: 7px;
+  background: linear-gradient(to bottom, #758278, #445159);
 }
 
-/* Contour intérieur : noir fin */
+/* Contour intérieur : ligne noire interne 1px */
 #nav-pv-inner {
   padding: 1px;
-  border-radius: 7px;
+  border-radius: 4px;
   background: #000;
 }
 
-/* La barre — fond = partie vide */
+/* La barre — fond = partie vide, border-radius identique à inner */
 #nav-pv-wrap {
   position: relative;
   width: 140px;
   height: 18px;
   background: #398470;
-  border-radius: 6px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
@@ -110,7 +112,7 @@ body {
   height: 100%;
   width: 100%;
   background: linear-gradient(to right, #679765, #6EA35F);
-  border-radius: 6px;
+  border-radius: 3px;
   transition: width 0.25s;
 }
 
@@ -123,7 +125,7 @@ body {
   right: 0;
   height: 35%;
   background: rgba(255, 255, 255, 0.25);
-  border-radius: 6px 6px 0 0;
+  border-radius: 3px 3px 0 0;
 }
 
 /* Ombre en bas */
@@ -135,7 +137,7 @@ body {
   right: 0;
   height: 25%;
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 0 0 6px 6px;
+  border-radius: 0 0 3px 3px;
 }
 
 #nav-pv-text {
@@ -254,13 +256,23 @@ body {
   color: #e8f0f0;
   z-index: 80;
   font-family: 'Exo 2', Arial, sans-serif;
-  overflow: hidden;
+  overflow: visible;
   background: #5d7a7a;
   border-radius: 15px;
+
+  /* Structure bordure complète :
+     - noir interne 1px (outline)
+     - corps coloré ~8px (box-shadow spread 9px)
+     - noir externe 1px (box-shadow spread 10px)
+  */
+  outline: 1px solid #000;
   box-shadow:
     0 16px 48px rgba(0, 0, 0, 0.7),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    inset 1px 0 0 rgba(255, 255, 255, 0.08);
+    0 0 0 1px #000,
+    0 0 0 9px #7a9898,
+    0 0 0 10px #000,
+    inset 0 6px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -6px 0 rgba(0, 0, 0, 0.08);
 }
 
 .panneau-entete {
@@ -340,6 +352,12 @@ body {
 .item-ligne:hover { background: #527070; }
 
 .item-icone { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; }
+
+/* Icônes compétences et casque un peu plus grandes pour équilibrer avec le coeur */
+#panneau-competences .item-icone {
+  width: 46px;
+  height: 46px;
+}
 .item-info { flex: 1; min-width: 0; }
 
 .item-nom {
@@ -441,16 +459,55 @@ body {
 
 .param-version { font-size: 11px; color: #7a9898; margin-top: 6px; text-align: center; letter-spacing: 0.5px; }
 
-#panneau-map { width: 88vw; max-width: 1100px; }
-
-.map-panel-wrap {
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid rgba(0, 0, 0, 0.3);
+/* Map — plein écran indépendant */
+#panneau-map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  z-index: 80;
+  background: #000;
 }
 
-.map-panel-wrap canvas { display: block; width: 100%; height: auto; }
-.map-legende { font-size: 11px; color: #a8c4c4; text-align: center; margin-top: 6px; letter-spacing: 0.3px; }
+#map-panel-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Bouton ✕ en haut à droite */
+#map-btn-fermer {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+/* Le ✕ : grand, dégradé rouge, contour noir */
+#map-croix {
+  font-size: 44px;
+  font-weight: bold;
+  line-height: 1;
+
+  /* Dégradé couleur sur le texte */
+  background: linear-gradient(to bottom, #BA5948, #934843);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  /* Contour noir simulé avec text-shadow */
+  filter: drop-shadow(-1px -1px 0 #000)
+          drop-shadow(1px -1px 0 #000)
+          drop-shadow(-1px 1px 0 #000)
+          drop-shadow(1px 1px 0 #000);
+
+  pointer-events: none;
+}
+
+.map-panel-wrap { display: none; }
+.map-legende { display: none; }
+
 
 /* =====================
    MESSAGE BOX

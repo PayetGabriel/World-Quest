@@ -3,7 +3,7 @@
 const joueur = {
   x: 2318,
   y: 1003,
-  vitesse: 4,
+  vitesse: 2,
   hpMax: 100,
   hp: 100,
   attaque: 15,
