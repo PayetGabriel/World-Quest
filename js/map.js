@@ -10,7 +10,7 @@ const RAYON_DETECTION_MONUMENT = 40;
 
 function chargerMap(callback) {
   mapImage = new Image();
-  mapImage.src = "assets/Map.jpg";
+  mapImage.src = "assets/Map Upgrade.jpg";
 
   mapImage.onload = function() {
     mapChargee = true;

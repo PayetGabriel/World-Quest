@@ -183,7 +183,7 @@ function verifierDebloquageDepart() {
     return;
   }
 
-  if (joueur.y >= 1399 && joueur.x >= 2088 && joueur.x <= 2158) {
+  if (joueur.y <= 1399 && joueur.x >= 2088 && joueur.x <= 2158) {
     debloquageDepartFait = true;
     debloquerZone(1);
     afficherMessage("Nouvelle zone débloquée : Tour Eiffel !");
