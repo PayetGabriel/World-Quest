@@ -27,44 +27,16 @@
 
     <div id="message-box"></div>
 
+    <!-- Écran de combat : juste le canvas plein écran -->
+    <!-- Le HUD (barres, log, contrôles) est dessiné directement sur ce canvas -->
     <div id="combat-screen">
       <canvas id="combat-canvas"></canvas>
-
-      <div id="combat-ui">
-
-        <div id="combat-fighters">
-
-          <div class="fighter-block">
-            <div class="fighter-label" id="player-name">Joueur</div>
-            <div id="player-combat-sprite"></div>
-            <div class="hp-bar-small-bg">
-              <div class="hp-bar-small-fill" id="player-combat-hp-fill"></div>
-            </div>
-            <div class="hp-number" id="player-combat-hp-text">100/100</div>
-          </div>
-
-          <div id="vs-label">VS</div>
-
-          <div class="fighter-block">
-            <div class="fighter-label" id="enemy-name">Gardien</div>
-            <div id="enemy-combat-sprite"></div>
-            <div class="hp-bar-small-bg">
-              <div class="hp-bar-small-fill enemy-fill" id="enemy-combat-hp-fill"></div>
-            </div>
-            <div class="hp-number" id="enemy-combat-hp-text">80/80</div>
-          </div>
-
-        </div>
-
-        <div id="combat-log">Un gardien apparaît !</div>
-
-        <div id="combat-controls-hint">
-          A = Attaquer &nbsp;|&nbsp; E = Esquiver &nbsp;|&nbsp; I = Inventaire
-        </div>
-
-      </div>
     </div>
 
+    <!-- Log caché utilisé comme stockage texte pour dessinerHUDCombat -->
+    <span id="combat-log" style="display:none;"></span>
+
+    <!-- Inventaire combat (fenêtre DOM par dessus le canvas combat) -->
     <div id="inventory-screen">
       <div id="inventory-title">Inventaire</div>
       <div id="inventory-items">
@@ -82,6 +54,17 @@
         </div>
       </div>
       <div id="inventory-hint">Appuie sur I pour fermer</div>
+    </div>
+
+    <!-- Ces éléments DOM sont gardés pour compatibilité avec mettreAJourBarresCombat -->
+    <!-- Ils sont cachés, les vraies barres sont dessinées sur le canvas combat -->
+    <div style="display:none;">
+      <span id="player-name"></span>
+      <span id="enemy-name"></span>
+      <div id="player-combat-hp-fill"></div>
+      <span id="player-combat-hp-text"></span>
+      <div id="enemy-combat-hp-fill"></div>
+      <span id="enemy-combat-hp-text"></span>
     </div>
 
   </div>

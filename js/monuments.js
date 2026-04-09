@@ -1,5 +1,4 @@
 // Coordonnées sur la map originale 3840x2095
-// A ajuster une fois les positions exactes confirmées visuellement
 
 const MONUMENTS = [
   {
@@ -13,8 +12,8 @@ const MONUMENTS = [
       nom: "Gardien Gaulois",
       hpMax: 60,
       hp: 60,
-      attaque: 10,
-      defense: 2,
+      attaque: 4,
+      defense: 1,
       couleur: "#3498db"
     }
   },
@@ -29,8 +28,8 @@ const MONUMENTS = [
       nom: "Gardien Tropical",
       hpMax: 75,
       hp: 75,
-      attaque: 13,
-      defense: 3,
+      attaque: 5,
+      defense: 1,
       couleur: "#27ae60"
     }
   },
@@ -45,8 +44,8 @@ const MONUMENTS = [
       nom: "Gardien du Désert",
       hpMax: 80,
       hp: 80,
-      attaque: 14,
-      defense: 4,
+      attaque: 6,
+      defense: 2,
       couleur: "#e67e22"
     }
   },
@@ -61,8 +60,8 @@ const MONUMENTS = [
       nom: "Gladiateur",
       hpMax: 90,
       hp: 90,
-      attaque: 16,
-      defense: 5,
+      attaque: 7,
+      defense: 2,
       couleur: "#c0392b"
     }
   },
@@ -77,8 +76,8 @@ const MONUMENTS = [
       nom: "Gardien du Golfe",
       hpMax: 95,
       hp: 95,
-      attaque: 17,
-      defense: 6,
+      attaque: 8,
+      defense: 2,
       couleur: "#8e44ad"
     }
   },
@@ -93,8 +92,8 @@ const MONUMENTS = [
       nom: "Gardien Moghol",
       hpMax: 100,
       hp: 100,
-      attaque: 18,
-      defense: 6,
+      attaque: 9,
+      defense: 3,
       couleur: "#e91e8c"
     }
   },
@@ -109,8 +108,8 @@ const MONUMENTS = [
       nom: "Gardien de l'Ouest",
       hpMax: 85,
       hp: 85,
-      attaque: 15,
-      defense: 5,
+      attaque: 7,
+      defense: 2,
       couleur: "#1abc9c"
     }
   },
@@ -125,8 +124,8 @@ const MONUMENTS = [
       nom: "Gardien Grec",
       hpMax: 110,
       hp: 110,
-      attaque: 19,
-      defense: 7,
+      attaque: 10,
+      defense: 3,
       couleur: "#f39c12"
     }
   },
@@ -141,8 +140,8 @@ const MONUMENTS = [
       nom: "Samouraï Doré",
       hpMax: 120,
       hp: 120,
-      attaque: 20,
-      defense: 8,
+      attaque: 12,
+      defense: 4,
       couleur: "#f1c40f"
     }
   }
