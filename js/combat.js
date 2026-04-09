@@ -353,73 +353,66 @@ function mettreAJourCombat(deltaTime) {
   }
 
   // --- Déplacement vertical ---
+
+  // On mémorise le bas avant le déplacement pour tester le trajet complet
+  let basAvant = combattant.y + combattant.hauteur;
+
   combattant.y = combattant.y + combattant.velociteY;
   combattant.auSol = false;
 
-  // Blocs solides — pas de plafond (seulement sol et murs)
-  if (joueurToucheSolide()) {
-    if (combattant.velociteY > 0) {
-      while (joueurToucheSolide()) { combattant.y = combattant.y - 1; }
-      combattant.auSol = true;
-    } else {
-      // On montait dans un mur latéral détecté comme solide — on laisse passer
-      // (les coins du haut ne sont plus testés donc ça ne devrait plus arriver)
-    }
+  // Bord haut de l'écran — empêche de sortir et le crash qui va avec
+  if (combattant.y < 0) {
+    combattant.y = 0;
     combattant.velociteY = 0;
   }
 
-  // Plateforme one-way (bleue)
-  // Bloquée si velociteY >= 0, ignorée si velociteY < 0
-  // La plage de test dy est calculée en pixels IMAGE pour plus de précision
+  // Blocs solides — sol et murs, pas de plafond
+  if (joueurToucheSolide()) {
+    if (combattant.velociteY >= 0) {
+      while (joueurToucheSolide()) { combattant.y = combattant.y - 1; }
+      combattant.auSol = true;
+    }
+    // Si velociteY < 0 on laisse passer (pas de plafond)
+    combattant.velociteY = 0;
+  }
+
+  // Plateforme one-way (bleue) : ignorée si on monte, active si on descend ou statique
+  // On teste tout le trajet vertical parcouru ce frame pour ne pas rater les lignes fines
   if (!combattant.auSol && combattant.velociteY >= 0) {
-    let bas = combattant.y + combattant.hauteur;
+    let basApres = combattant.y + combattant.hauteur;
     let gauche = combattant.x + 8;
     let milieu = combattant.x + combattant.largeur / 2;
     let droite = combattant.x + combattant.largeur - 8;
 
-    // Convertir 6px écran en pixels image pour la plage de test
-    let dyImageMax = Math.ceil((6 / canvasCombat.height) * collisionsHauteur) + 1;
+    // Convertir le trajet en pixels image
+    let pyAvant = Math.floor((basAvant / canvasCombat.height) * collisionsHauteur);
+    let pyApres = Math.floor((basApres / canvasCombat.height) * collisionsHauteur);
+    let pxG = Math.floor((gauche / canvasCombat.width) * collisionsLargeur);
+    let pxM = Math.floor((milieu / canvasCombat.width) * collisionsLargeur);
+    let pxD = Math.floor((droite / canvasCombat.width) * collisionsLargeur);
 
-    let coordBas = ecranVersCollision(milieu, bas);
     let touchePlateforme = false;
+    let pyCollision = -1;
 
-    for (let dyImg = 0; dyImg <= dyImageMax; dyImg++) {
-      let cG = getCouleurCollision(ecranVersCollision(gauche, bas).px, coordBas.py + dyImg);
-      let cM = getCouleurCollision(coordBas.px, coordBas.py + dyImg);
-      let cD = getCouleurCollision(ecranVersCollision(droite, bas).px, coordBas.py + dyImg);
+    // Scanner chaque ligne image entre basAvant et basApres
+    for (let py = pyAvant; py <= pyApres + 1; py++) {
+      let cG = getCouleurCollision(pxG, py);
+      let cM = getCouleurCollision(pxM, py);
+      let cD = getCouleurCollision(pxD, py);
 
-      let bleuG = cG.b > 150 && cG.r < 40 && cG.v < 80;
-      let bleuM = cM.b > 150 && cM.r < 40 && cM.v < 80;
-      let bleuD = cD.b > 150 && cD.r < 40 && cD.v < 80;
-
-      if (bleuG || bleuM || bleuD) {
+      if ((cG.b > 150 && cG.r < 40 && cG.v < 80) ||
+          (cM.b > 150 && cM.r < 40 && cM.v < 80) ||
+          (cD.b > 150 && cD.r < 40 && cD.v < 80)) {
         touchePlateforme = true;
+        pyCollision = py;
         break;
       }
     }
 
     if (touchePlateforme) {
-      // Remonter jusqu'à ne plus toucher
-      let securite = 0;
-      while (securite < 30) {
-        let basCourant = combattant.y + combattant.hauteur;
-        let coordC = ecranVersCollision(milieu, basCourant);
-        let encoreDedans = false;
-        for (let dyImg = 0; dyImg <= dyImageMax; dyImg++) {
-          let cG2 = getCouleurCollision(ecranVersCollision(gauche, basCourant).px, coordC.py + dyImg);
-          let cM2 = getCouleurCollision(coordC.px, coordC.py + dyImg);
-          let cD2 = getCouleurCollision(ecranVersCollision(droite, basCourant).px, coordC.py + dyImg);
-          if ((cG2.b > 150 && cG2.r < 40 && cG2.v < 80) ||
-              (cM2.b > 150 && cM2.r < 40 && cM2.v < 80) ||
-              (cD2.b > 150 && cD2.r < 40 && cD2.v < 80)) {
-            encoreDedans = true;
-            break;
-          }
-        }
-        if (!encoreDedans) { break; }
-        combattant.y = combattant.y - 1;
-        securite = securite + 1;
-      }
+      // Repositionner le joueur juste au-dessus de la ligne de collision
+      let ecranYCollision = Math.floor((pyCollision / collisionsHauteur) * canvasCombat.height);
+      combattant.y = ecranYCollision - combattant.hauteur;
       combattant.auSol = true;
       combattant.velociteY = 0;
     }
